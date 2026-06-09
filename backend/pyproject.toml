@@ -1,0 +1,81 @@
+[project]
+name = "uber-clone-backend"
+version = "0.1.0"
+description = "Production-grade ride-hailing backend (Uber clone) — FastAPI, PostGIS, Redis, Kafka, WebSockets"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+authors = [{ name = "Keerthi T" }]
+dependencies = [
+    # Web framework
+    "fastapi==0.111.0",
+    "uvicorn[standard]==0.30.1",
+    "python-multipart==0.0.9",
+    "websockets==12.0",
+    # Settings / validation
+    "pydantic==2.7.4",
+    "pydantic-settings==2.3.4",
+    "email-validator==2.2.0",
+    # Database (async SQLAlchemy 2.0 + PostGIS)
+    "sqlalchemy[asyncio]==2.0.31",
+    "asyncpg==0.29.0",
+    "geoalchemy2==0.15.2",
+    "alembic==1.13.2",
+    # Auth
+    "passlib[bcrypt]==1.7.4",
+    "bcrypt==4.1.3",
+    "python-jose[cryptography]==3.3.0",
+    # Cache
+    "redis==5.0.7",
+    # Kafka producer
+    "aiokafka==0.11.0",
+    # Geo (pure-Python geohash — no C build step, portable across OSes)
+    "pygeohash==1.2.0",
+    # HTTP client (pricing engine integration)
+    "httpx==0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.2.2",
+    "pytest-asyncio==0.23.7",
+    "httpx==0.27.0",
+    "asgi-lifespan==2.1.0",
+    # Integration tests run against a real PostGIS container (geometry columns
+    # can't be exercised on SQLite). psycopg2 is only used by testcontainers'
+    # readiness probe; the app itself uses asyncpg.
+    "testcontainers[postgres,redis]==4.8.2",
+    "psycopg2-binary==2.9.9",
+    "ruff==0.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==8.2.2",
+    "pytest-asyncio==0.23.7",
+    "httpx==0.27.0",
+    "asgi-lifespan==2.1.0",
+    "testcontainers[postgres,redis]==4.8.2",
+    "psycopg2-binary==2.9.9",
+    "ruff==0.5.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]  # FastAPI Depends() in defaults is idiomatic
